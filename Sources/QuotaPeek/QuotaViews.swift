@@ -20,6 +20,15 @@ private func ageLabel(_ date: Date, now: Date) -> String {
     return "\(seconds / 3600) 小时前"
 }
 
+private func resetLabel(_ reset: Date?, now: Date) -> String {
+    guard let reset else { return "重置时间未知" }
+    let minutes = Int(ceil(reset.timeIntervalSince(now) / 60))
+    if minutes <= 0 { return "等待重置更新" }
+    if minutes < 60 { return "\(minutes) 分钟后重置" }
+    if minutes < 1440 { return "\(minutes / 60) 小时 \(minutes % 60) 分钟后重置" }
+    return "\(minutes / 1440) 天 \((minutes % 1440) / 60) 小时后重置"
+}
+
 struct QuotaPanel: View {
     @ObservedObject var model: AppModel
     let openSettings: () -> Void
@@ -167,7 +176,7 @@ struct QuotaPanel: View {
             }
         }
         .scrollIndicators(.hidden)
-        .frame(height: min(CGFloat(model.preferences.profiles.count) * 140 - 10, 420))
+        .frame(height: min(CGFloat(model.preferences.profiles.count) * 158 - 10, 470))
     }
 
     private func errorNote(_ message: String) -> some View {
@@ -210,6 +219,10 @@ private struct SlotSummary: View {
                             }
                             ProgressView(value: value, total: 100)
                                 .tint(quotaColor(window.usedPercent, threshold: preferences.warningPercent, stale: stale))
+                            Text(resetLabel(window.resetsAt, now: now))
+                                .font(.system(size: 10)).foregroundStyle(.secondary)
+                                .lineLimit(1).minimumScaleFactor(0.8)
+                                .help(window.resetsAt?.formatted(date: .complete, time: .shortened) ?? "接口未提供重置时间")
                         }.frame(maxWidth: .infinity)
                     }
                 }
@@ -224,7 +237,7 @@ private struct SlotSummary: View {
                     .lineLimit(2).frame(maxWidth: .infinity, minHeight: 50, alignment: .leading)
             }
         }
-        .padding(13).frame(maxWidth: .infinity, minHeight: 130, alignment: .topLeading)
+        .padding(13).frame(maxWidth: .infinity, minHeight: 148, alignment: .topLeading)
         .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 14))
         .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.primary.opacity(0.065)))
         .opacity(profile.enabled ? 1 : 0.6)
@@ -264,21 +277,12 @@ struct QuotaCard: View {
                 }
             }.frame(height: 5)
                 .accessibilityLabel("\(window.title)\(showRemaining ? "剩余" : "已用") \(Int(displayed))%")
-            Text(resetText).font(.system(size: 10)).foregroundStyle(.secondary)
+            Text(resetLabel(window.resetsAt, now: now)).font(.system(size: 10)).foregroundStyle(.secondary)
                 .lineLimit(1).minimumScaleFactor(0.8)
                 .help(window.resetsAt?.formatted(date: .complete, time: .shortened) ?? "接口未提供重置时间")
         }
         .padding(13).frame(maxWidth: .infinity, minHeight: 140)
         .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 14))
         .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Color.primary.opacity(0.075)))
-    }
-
-    private var resetText: String {
-        guard let reset = window.resetsAt else { return "重置时间未知" }
-        let minutes = Int(ceil(reset.timeIntervalSince(now) / 60))
-        if minutes <= 0 { return "等待重置更新" }
-        if minutes < 60 { return "\(minutes) 分钟后重置" }
-        if minutes < 1440 { return "\(minutes / 60) 小时 \(minutes % 60) 分钟后重置" }
-        return "\(minutes / 1440) 天 \((minutes % 1440) / 60) 小时后重置"
     }
 }
