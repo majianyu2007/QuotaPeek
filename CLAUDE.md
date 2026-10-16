@@ -45,8 +45,3 @@ Three targets share one library:
 - **Only fixed `QuotaError` messages reach the UI.** `connectionError` never surfaces raw system or server text, which could contain secrets. The one exception is the server's `error.code`, carried in `QuotaError.http(_, reason:)`; `QuotaClient.errorCode(from:)` keeps it only if it is a short identifier. Never log response bodies or keys.
 - **Keychain failures must not block launch.** A locked Keychain or a changed code signature should not block menu-bar startup. Use `allowInteraction: true` only in user-initiated save paths.
 - **Language mode is Swift 5.** The package uses tools 6.0 but `swiftLanguageModes: [.v5]`.
-
-## VM2API server quirk
-
-`GET /v1/usage` on VM2API returns `503 pool_unavailable` for any key that has a `user_id`, even an admin's. The usage route doesn't pass `apiKeyStore` to the scheduler, so the owner's role is unknown and platform (unowned) VMs are filtered out. The fix is on the data side: clear `user_id` on the key. Don't add client retries for it; the error is permanent. The README documents this for users.
-
