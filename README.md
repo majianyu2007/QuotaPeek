@@ -6,7 +6,16 @@ QuotaPeek 是一个 macOS 菜单栏应用，用于查看 VM2API 及 Claude 兼�
 
 从 [Releases](https://github.com/majianyu2007/QuotaPeek/releases) 下载 `QuotaPeek.dmg`，将 QuotaPeek 拖入「应用程序」。
 
-应用仅使用 ad-hoc 签名，未经 Apple 公证。首次打开时如被系统阻止，请在「系统设置 → 隐私与安全性」中选择「仍要打开」。
+应用仅使用 ad-hoc 签名，未经 Apple 公证。首次打开时，系统可能提示“Apple 无法验证 QuotaPeek 是否包含可能危害 Mac 安全或泄漏隐私的恶意软件”。可选择以下任一方式处理：
+
+- 点击「完成」，然后在「系统设置 → 隐私与安全性」中选择「仍要打开」。
+- 在终端中移除隔离属性后重新打开：
+
+  ```sh
+  xattr -dr com.apple.quarantine /Applications/QuotaPeek.app
+  ```
+
+覆盖安装新版本后，首次读取钥匙串时系统可能请求授权，选择「始终允许」即可。
 
 ## 使用
 
